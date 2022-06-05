@@ -8,4 +8,6 @@ On running main,py, graphs are generated for the objective function defined in `
 - Objective function vs iterations
 - Plot of the objective function
 
-Initialization and configuration options are available in `main.py`
+Initialization and configuration options are available in `annealing/main.py`
+
+Sample outputs are present in `annealing/output/`
