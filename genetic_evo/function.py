@@ -2,15 +2,14 @@ import numpy as np
 
 rng = np.random.default_rng()
 
-K = 10
-
-def sort_initial_pop(size):
+def sort_initial_pop(size, K):
     original = [np.expand_dims(np.arange(K),0) for _ in range(size)]
     permuted = [rng.permutation(x,axis=1) for x in original]
     return np.concatenate(permuted,axis=0)
 
 def sort_f(x):
-    return np.sum(np.abs(x[:,:-1]-x[:,1:]),axis=1)
+    k = x.shape[-1]
+    return np.sum(np.abs(x[:,:-1]-x[:,1:]),axis=1) - (k-1)
     # return (x-1)*(x+2)*x*(x+3) + (x-4)*(x-6)*(x+1)
 
 def sort_mutation(x, p):

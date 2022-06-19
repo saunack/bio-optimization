@@ -9,13 +9,13 @@ def generate_T_decay(T, decay, threshold):
         T = T*decay
         yield T
 
-def ga(fitness, mutation, crossover, pop_generator, elitism=0.2, pop=100 , mutation_prob=0.05, iterations=100, threshold=None):
+def ga(fitness, mutation, crossover, pop_generator, elitism=0.2, pop=100 , mutation_prob=0.05, iterations=100, threshold=None, list_size=100):
     log = []
     if iterations is not None and threshold is not None:
         raise ValueError("Specify one of iterations and threshold")
     
     # initial population
-    x = pop_generator(pop)
+    x = pop_generator(pop, list_size)
     to_keep = int(elitism*pop)
 
     for i in generate_iter(iterations):
