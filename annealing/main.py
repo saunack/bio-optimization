@@ -4,7 +4,13 @@ from utils import plot, batch_plot
 import argparse
 
 from mnist import MNIST
-from function import loss_mnist, accuracy_mnist, sampler_ml, initializer_mnist
+from function import sampler_ml
+
+import sys
+import os
+sys.path.insert(1, os.path.join(sys.path[0], '..')) # to import mnist_keras.utils
+
+from mnist_keras.utils import loss_mnist, accuracy_mnist, initializer_mnist
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--disable_gif', dest='base_plot', action='store_false',

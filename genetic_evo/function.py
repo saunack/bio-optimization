@@ -1,26 +1,6 @@
 import numpy as np
 
 
-## Functions for digit classification objective
-def mnist_initial_pop(size, kwargs):
-    w1 = np.random.rand((size, 784, 12))
-    w2 = np.random.rand((size, 12, 1))
-    return [w1,w2]
-
-def mnist_f(w, images, labels):
-    # weights are size pop_sizex784x12 and pop_sizex12x1
-    # image sizes are batch_sizex784
-    # we need scores for each individual, i.e., pop_size number of scores
-    # averaging across batch will be done via sum
-    images = np.asarray(images).expand_dims(axis=1) # image size will be batchx1x784 (already flattened)
-    labels = np.asarray(labels)
-    
-    # output shape will be batchx1x1
-    outputs = np.matmul(np.matmul(w[0],images),w[1])
-    outputs = outputs[:,0,0]
-    rmse = (outputs-labels)**2
-    return rmse
-
 ## Functions for sorting objective
 def sort_initial_pop(size, kwargs):
     rng = np.random.default_rng()
@@ -78,3 +58,42 @@ def sort_crossover(x1, x2):
             break
         
     return x1, x2
+
+
+##### MNIST functions
+"""
+    Model to be compared against
+    model = keras.Sequential([
+        layers.Input(input_shape=(784,)),
+        layers.Dense(12,use_bias=False),
+        layers.Dense(10,activation='softmax',use_bias=False),
+    ])
+"""
+import sys
+import os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
+
+from mnist_keras.utils import initializer_mnist
+
+
+def mnist_initial_pop(size, kwargs):
+    w1 = np.random.rand((size, 784, 12))
+    w2 = np.random.rand((size, 12, 1))
+    return [w1,w2]
+
+def mnist_f(w, images, labels):
+    # weights are size pop_sizex784x12 and pop_sizex12x1
+    # image sizes are batch_sizex784
+    # we need scores for each individual, i.e., pop_size number of scores
+    # averaging across batch will be done via sum
+    images = np.asarray(images).expand_dims(axis=1) # image size will be batchx1x784 (already flattened)
+    labels = np.asarray(labels)
+    
+    # output shape will be batchx1x1
+    outputs = np.matmul(np.matmul(w[0],images),w[1])
+    outputs = outputs[:,0,0]
+    rmse = (outputs-labels)**2
+    return rmse
+
+

@@ -1,5 +1,9 @@
+import sys
+import os
+sys.path.insert(1, os.path.join(sys.path[0], '..')) # to import mnist_keras.utils
+
 import numpy as np
-from function import one_hot
+from mnist_keras.utils import one_hot
 
 def generate_T_iter(T, decay, iterations):
 	for _ in range(iterations):
