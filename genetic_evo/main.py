@@ -32,7 +32,7 @@ parser.add_argument('--thresh', default=None, type=float,
                     help='threshold for function')
 # options for objectives
 parser.add_argument('--objective', default="ml",
-                    help='Objective to run the code for (ml/poly)')
+                    help='Objective to run the code for (ml/sort)')
 # options for polynomial objective
 parser.add_argument('-K', default=10, type=int,
                     help='length of list to be sorted for sorting')
@@ -78,6 +78,31 @@ if __name__ == "__main__":
 											 threshold=args.thresh, iterations=args.iterations, 
 											 load_pretrained=args.load_pretrained, kernel_initializer=args.initializer, batch_size=args.batch_size)
 		print("Test accuracy: ",opt,max(opt))
+	# elif args.objective == 'sort_100':
+	# 	opts = []
+	# 	logs = []
+	# 	for i in range(100):
+	# 		opt, run_logs, (x,y) = run_annealing_quadratic(args.x0,args.t0,decay=args.decay,
+	# 										 threshold=args.thresh, iterations=args.iterations, base_plot=args.base_plot)
+	# 		opts.append(f(opt))
+	# 		logs.append(run_logs)
+	# 		if i%10 == 0:
+	# 			print(f"At run {i}. Plotting")
+	# 			batch_plot(opts,logs,args.output_dir,args.prefix,opts_name='loss')
+	# 	batch_plot(opts,logs,args.output_dir,args.prefix,opts_name='loss')
+	# elif args.objective == 'ml_100':
+	# 	opts = []
+	# 	logs = []
+	# 	for i in range(100):
+	# 		opt, run_logs = run_annealing_ml(args.t0,decay=args.decay,
+	# 					 threshold=args.thresh, iterations=args.iterations,
+	# 					 load_pretrained=args.load_pretrained, kernel_initializer=args.initializer, batch_size=args.batch_size)
+	# 		opts.append(opt)
+	# 		logs.append(run_logs)
+	# 		if i%10 == 0:
+	# 			print(f"At run {i}. Plotting")
+	# 			batch_plot(opts,logs,args.output_dir,args.prefix)
+	# 	batch_plot(opts,logs,args.output_dir,args.prefix)
 	else:
 		x_opt, run_logs, (x, y) = None, None, (None, None)
 	plot(run_logs,args.output_dir,args.prefix)
