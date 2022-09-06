@@ -46,7 +46,7 @@ def run_annealing_quadratic(x, T, decay, threshold, iterations, base_plot):
 	return run_logs
 
 def run_annealing_ml(T, decay, threshold, iterations, load_pretrained, kernel_initializer):
-	mndata = MNIST('../data',return_type='numpy')
+	mndata = MNIST(os.path.join('..','data'),return_type='numpy')
 	if iterations is not None:
 		y, run_logs = annealing_ml(loss_mnist, accuracy_mnist, sampler_ml, initializer_mnist, mndata, T, decay=decay, iterations=iterations, load_pretrained=load_pretrained, kernel_initializer=kernel_initializer)
 	else:

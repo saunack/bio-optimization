@@ -1,3 +1,4 @@
+import os
 import numpy as np
 
 ## CONSTANTS
@@ -11,20 +12,20 @@ def one_hot(y):
     return out
 
 
-def initializer_mnist(load_pretrained=False,initializer='gaussian'):
+def initializer_mnist(load_pretrained=False,initializer='glorot',n_models=1):
 	if initializer == 'glorot':
 		# glorot initializer
-		w1 = np.random.uniform(-np.sqrt(6/(28**2+K)),np.sqrt(6/(28**2+K)),size=(28*28,K))
-		w2 = np.random.normal(-np.sqrt(6/(10+K)),np.sqrt(6/(10+K)),size=(K,10))
+		w1 = np.random.uniform(-np.sqrt(6/(28**2+K)),np.sqrt(6/(28**2+K)),size=(n_models,28*28,K))
+		w2 = np.random.normal(-np.sqrt(6/(10+K)),np.sqrt(6/(10+K)),size=(n_models,K,10))
 	else: #elif initializer == 'gaussian':
-		w1 = np.random.normal(size=(28*28,K),scale=SCALE)
-		w2 = np.random.normal(size=(K,10),scale=SCALE)
+		w1 = np.random.normal(size=(n_models,28*28,K),scale=SCALE)
+		w2 = np.random.normal(size=(n_models,K,10),scale=SCALE)
 
 	if load_pretrained:
 		# saved with K=12
 		# add some initial peturbation
-		w1 = w1 + np.load(os.path.join('weights','layer_0.npy'))
-		w2 = w2 + np.load(os.path.join('weights','layer_1.npy'))
+		w1 = w1 + np.load(os.path.join('..','mnist_keras','weights','layer_0.npy'))
+		w2 = w2 + np.load(os.path.join('..','mnist_keras','weights','layer_1.npy'))
 	return [w1,w2]
 
 ## x is the weights matrix
@@ -45,7 +46,12 @@ def output_mnist(x, images):
 def loss_mnist(x, images, labels):
 	output = output_mnist(x, images)
 	clipped = np.clip(output,1e-7, 1-1e-7)
-	# output and labels shape: batch_size * categories (10)
+	# x shape: n_models * [weight matrix 1, weight matrix 2]
+	# output shape: n_models * batch_size * categories (10)
+	# labels shape: batch_size * categories
+	print(output.shape, labels.shape, x[0].shape)
+	# add dimension to labels and replicate across new dimension
+	labels = np.dstack([labels]*output.shape[0]).reshape(output.shape[0],*labels.shape)
 	cross_entropy_1 = labels * np.log(clipped+1e-7)
 	cross_entropy_2 = (1-labels) * np.log((1-clipped)+1e-7)
 	cross_entropy = cross_entropy_2 + cross_entropy_1
@@ -58,5 +64,4 @@ def accuracy_mnist(x, images, labels):
 	output = output_mnist(x, images)
 	predicted_class = np.argmax(output,axis=-1)
 	true_class = np.argmax(labels,axis=-1)
-	return np.sum(predicted_class==true_class)/predicted_class.shape[0]
- 
+	return np.sum(predicted_class==true_class,axis=-1)/predicted_class.shape[-1] 
