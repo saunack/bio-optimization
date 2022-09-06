@@ -19,8 +19,10 @@ def sort_f(x, kwargs):
 
 def sort_mutation(x, p):
     # batch processing for mutation
+    # swap mutation is suitable here because the resulting list should be a permutation
     N, k = x.shape
-    # get random numbers for each of N individuals
+    # get random numbers for each of N individuals for checking if mutation will be done
+    # generates 2D array of Nxk. For each N, value is [True]*k or [False]*k
     rand = np.tile(np.expand_dims(np.random.rand(N) < p, 1), (1,k))
     
     # generate switching positions for mutation
@@ -72,28 +74,50 @@ def sort_crossover(x1, x2):
 import sys
 import os
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
+from mnist_keras.utils import SCALE
 
+def mnist_mutation(x, p):
+    n_models = x[0].shape[0]
+    # get random numbers for each of N individuals for checking if mutation will be done
+    rand = np.random.rand(n_models) < p
+    # choose whether the first weight matrix will be mutated or the second
+    matrix_rand = np.random.rand(n_models) < 0.5
+    def tile(m,shape):
+    	return np.tile(np.expand_dims(np.expand_dims(m,-1),-1),shape[1:])
+    mutation_w1_bool = tile(rand,x[0].shape) * tile(matrix_rand,x[0].shape)
+    mutation_w2_bool = tile(rand,x[1].shape) * tile(~matrix_rand,x[1].shape)
 
-from mnist_keras.utils import initializer_mnist
+    # changing mutation might change results
+    x[0] = x[0] + mutation_w1_bool * np.random.uniform(size=x[0].shape)
+    x[1] = x[1] + mutation_w2_bool * np.random.uniform(size=x[1].shape)
 
+    return x
 
-def mnist_initial_pop(size, kwargs):
-    w1 = np.random.rand((size, 784, 12))
-    w2 = np.random.rand((size, 12, 1))
-    return [w1,w2]
-
-def mnist_f(w, images, labels):
-    # weights are size pop_sizex784x12 and pop_sizex12x1
-    # image sizes are batch_sizex784
-    # we need scores for each individual, i.e., pop_size number of scores
-    # averaging across batch will be done via sum
-    images = np.asarray(images).expand_dims(axis=1) # image size will be batchx1x784 (already flattened)
-    labels = np.asarray(labels)
-    
-    # output shape will be batchx1x1
-    outputs = np.matmul(np.matmul(w[0],images),w[1])
-    outputs = outputs[:,0,0]
-    rmse = (outputs-labels)**2
-    return rmse
-
+def mnist_crossover(x, i1, i2):
+	# x1 and x2 shape: w1 x w2
+	# different ways of crossing over
+	# # 1. switch layers directly
+	# layer = 1
+	# temp = x1[layer].copy()
+	# x1[layer] = x2[layer]
+	# x2[layer] = temp
+	# return x1, x2
+	# 2. switch all connections for a layer
+	# choose layer to switch
+	x1 = [x[i][i1,:,:] for i in range(len(x))]
+	x2 = [x[i][i2,:,:] for i in range(len(x))]
+	layer = 0 if np.random.rand()<0.5 else 1
+	# choose whether to switch all connections from the input side or the output side
+	# e.g.: w1 x w2. if head_tail == 1, k x w2 will be switched. Otherwise, w1 x k
+	head_tail = 1 if np.random.rand()<0.5 else 2
+	idx = np.random.randint(1,x1[layer].shape[head_tail]+1)
+	if head_tail == 1:
+		temp = x1[layer][:idx,:].copy()
+		x1[layer][:idx,:] = x2[layer][:idx,:]
+		x2[layer][:idx,:] = temp
+	else:	
+		temp = x1[layer][:,:idx].copy()
+		x1[layer][:,:idx] = x2[layer][:,:idx]
+		x2[layer][:,:idx] = temp
+	return x1, x2
 
