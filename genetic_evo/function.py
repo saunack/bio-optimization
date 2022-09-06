@@ -109,7 +109,7 @@ def mnist_crossover(x, i1, i2):
 	layer = 0 if np.random.rand()<0.5 else 1
 	# choose whether to switch all connections from the input side or the output side
 	# e.g.: w1 x w2. if head_tail == 1, k x w2 will be switched. Otherwise, w1 x k
-	head_tail = 1 if np.random.rand()<0.5 else 2
+	head_tail = 0 if np.random.rand()<0.5 else 1
 	idx = np.random.randint(1,x1[layer].shape[head_tail]+1)
 	if head_tail == 1:
 		temp = x1[layer][:idx,:].copy()

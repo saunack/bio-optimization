@@ -74,9 +74,10 @@ if __name__ == "__main__":
 		print("Optimal solution: ",x, y)
 		print("Final iteration: ",x_opt[:5,:])
 	elif args.objective == 'ml':
-		x_opt, run_logs, (x, y) = run_ga_mnist(args.pop,args.mutation_prob,args.elitism,
+		opt, run_logs = run_ga_mnist(args.pop,args.mutation_prob,args.elitism,
 											 threshold=args.thresh, iterations=args.iterations, 
 											 load_pretrained=args.load_pretrained, kernel_initializer=args.initializer, batch_size=args.batch_size)
+		print("Test accuracy: ",opt,max(opt))
 	else:
 		x_opt, run_logs, (x, y) = None, None, (None, None)
 	plot(run_logs,args.output_dir,args.prefix)

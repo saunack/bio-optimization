@@ -37,7 +37,7 @@ def output_mnist(x, images):
 
 	# output shape: batch_size * categories (10)
 	# apply softmax (with upper and lower bound clipping)
-	sigmoid = np.clip(np.exp(output),np.exp(-708),np.exp(709))
+	sigmoid = np.exp(np.clip(output,-708,709))
 	sigmoid_sum = np.reshape(np.repeat(np.sum(sigmoid,axis=-1), output.shape[-1]), output.shape)
 	softmax = sigmoid/(sigmoid_sum)
 
@@ -49,9 +49,8 @@ def loss_mnist(x, images, labels):
 	# x shape: n_models * [weight matrix 1, weight matrix 2]
 	# output shape: n_models * batch_size * categories (10)
 	# labels shape: batch_size * categories
-	print(output.shape, labels.shape, x[0].shape)
 	# add dimension to labels and replicate across new dimension
-	labels = np.dstack([labels]*output.shape[0]).reshape(output.shape[0],*labels.shape)
+	labels = np.tile(np.expand_dims(labels,0),(output.shape[0],1,1))
 	cross_entropy_1 = labels * np.log(clipped+1e-7)
 	cross_entropy_2 = (1-labels) * np.log((1-clipped)+1e-7)
 	cross_entropy = cross_entropy_2 + cross_entropy_1

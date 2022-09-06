@@ -71,16 +71,16 @@ def ga_ml(fitness, accuracy, mutation, crossover, pop_generator, data, elitism=0
             labels = one_hot(labels)
 
         y = fitness(x, images, labels)
-        print(y.shape)
         acc = accuracy(x, images, labels)
         # generate new samples
         sort_idx = np.argsort(y)
+        sort_acc = np.argsort(acc)
 
         elite = [x[i][sort_idx[:to_keep],:,:] for i in range(len(x))]
         
         min_y, max_y = y[sort_idx[0]], y[sort_idx[-1]]
         min_acc, max_acc = acc[sort_idx[0]], acc[sort_idx[-1]]
-        #avg_y = avg(y)
+            
         log.append({'min_y':min_y, 'max_y':max_y,'min_acc':min_acc,'max_acc':max_acc})
         
         new_pop = []
@@ -91,10 +91,11 @@ def ga_ml(fitness, accuracy, mutation, crossover, pop_generator, data, elitism=0
                 cross = crossover(x,i1,i2)
                 new_pop.append(cross[0])
                 new_pop.append(cross[1])
-        x[0] = np.concatenate([k[0] for k in elite]+[np.expand_dims(k[0],0) for k in new_pop])
-        x[1] = np.concatenate([k[1] for k in elite]+[np.expand_dims(k[1],0) for k in new_pop])
+        x[0] = np.concatenate([elite[0]]+[np.expand_dims(k[0],0) for k in new_pop])
+        x[1] = np.concatenate([elite[1]]+[np.expand_dims(k[1],0) for k in new_pop])
         x = mutation(x, mutation_prob)
-        print(log[-1])
+        # print(log[-1])
+        
 
     test_images, test_labels = data.load_testing()
     test_labels_category = one_hot(test_labels)
