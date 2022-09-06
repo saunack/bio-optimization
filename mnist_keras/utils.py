@@ -57,7 +57,7 @@ def loss_mnist(x, images, labels):
 	cross_entropy = cross_entropy_2 + cross_entropy_1
 	mean_loss = -np.mean(cross_entropy, axis=-1)
 	# take the mean. Sum will give the same results since batch sizes are constant and last batch does not matter
-	return np.mean(mean_loss)
+	return np.mean(mean_loss,axis=-1)
 
 
 def accuracy_mnist(x, images, labels):

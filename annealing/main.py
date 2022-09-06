@@ -13,14 +13,12 @@ sys.path.insert(1, os.path.join(sys.path[0], '..')) # to import mnist_keras.util
 from mnist_keras.utils import loss_mnist, accuracy_mnist, initializer_mnist
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--disable_gif', dest='base_plot', action='store_false',
-						help='flag for disabling gif creation')
+# options for output naming/location
 parser.add_argument('--prefix', default="sa_",
                     help='add file prefix names')
 parser.add_argument('--output_dir', default="output/",
                     help='output_directory')
-parser.add_argument('--x0', default=0, type=float,
-                    help='initial solution')
+# options for annealing
 parser.add_argument('--t0', default=20, type=float,
                     help='initial temperature')
 parser.add_argument('--decay', default=0.92, type=float,
@@ -29,8 +27,17 @@ parser.add_argument('--thresh', default=0.1, type=float,
                     help='threshold for temperature')
 parser.add_argument('--iterations', default=None, type=int,
                     help='Number of iterations to run the code for (threshold is ignored if iterations are provided)')
+# options for objectives
 parser.add_argument('--objective', default="ml",
                     help='Objective to run the code for (ml/poly)')
+# options for sorting objective
+parser.add_argument('--disable_gif', dest='base_plot', action='store_false',
+						help='flag for disabling gif creation')
+parser.add_argument('--x0', default=0, type=float,
+                    help='initial solution')
+# options for ml objective
+parser.add_argument('--batch_size', default=32, type=int,
+                    help='batch_size for mnist')
 parser.add_argument('--load_pretrained', dest='load_pretrained', action='store_true',
                     help='Load pretrained weights for classification for MNIST')
 parser.add_argument('--initializer', default='gaussian',
@@ -45,19 +52,21 @@ def run_annealing_quadratic(x, T, decay, threshold, iterations, base_plot):
 		run_logs = annealing(f, sampler, x, T, decay=decay, threshold=threshold, base_plot=base_plot)
 	return run_logs
 
-def run_annealing_ml(T, decay, threshold, iterations, load_pretrained, kernel_initializer):
+def run_annealing_ml(T, decay, threshold, iterations, load_pretrained, kernel_initializer,batch_size):
 	mndata = MNIST(os.path.join('..','data'),return_type='numpy')
 	if iterations is not None:
-		y, run_logs = annealing_ml(loss_mnist, accuracy_mnist, sampler_ml, initializer_mnist, mndata, T, decay=decay, iterations=iterations, load_pretrained=load_pretrained, kernel_initializer=kernel_initializer)
+		y, run_logs = annealing_ml(loss_mnist, accuracy_mnist, sampler_ml, initializer_mnist, mndata, T, decay=decay, iterations=iterations,
+		 load_pretrained=load_pretrained, kernel_initializer=kernel_initializer, batch_size=batch_size)
 	else:
-		y, run_logs = annealing_ml(loss_mnist, accuracy_mnist, sampler_ml, initializer_mnist, mndata, T, decay=decay, threshold=threshold, load_pretrained=load_pretrained, kernel_initializer=kernel_initializer)
+		y, run_logs = annealing_ml(loss_mnist, accuracy_mnist, sampler_ml, initializer_mnist, mndata, T, decay=decay, threshold=threshold,
+		 load_pretrained=load_pretrained, kernel_initializer=kernel_initializer, batch_size=batch_size)
 	return y, run_logs
 
 if __name__ == "__main__":
 	if args.objective == 'ml':
 		opt, run_logs = run_annealing_ml(args.t0,decay=args.decay,
 						 threshold=args.thresh, iterations=args.iterations,
-						 load_pretrained=args.load_pretrained, kernel_initializer=args.initializer)
+						 load_pretrained=args.load_pretrained, kernel_initializer=args.initializer, batch_size=args.batch_size)
 		print("Test accuracy: ",opt)
 		plot(run_logs,args.output_dir,args.prefix)
 	elif args.objective == 'poly':
@@ -83,7 +92,7 @@ if __name__ == "__main__":
 		for i in range(100):
 			opt, run_logs = run_annealing_ml(args.t0,decay=args.decay,
 						 threshold=args.thresh, iterations=args.iterations,
-						 load_pretrained=args.load_pretrained, kernel_initializer=args.initializer)
+						 load_pretrained=args.load_pretrained, kernel_initializer=args.initializer, batch_size=args.batch_size)
 			opts.append(opt)
 			logs.append(run_logs)
 			if i%10 == 0:
